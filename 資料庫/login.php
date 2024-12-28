@@ -24,7 +24,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION['account'] = $user['account_number'];
 
         // 跳轉到書本賣家頁面
-        header("Location: bookseller.php");
+        header("Location: home.php");
         exit();
     } else {
         // 帳號或密碼錯誤
