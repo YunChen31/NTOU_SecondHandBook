@@ -149,7 +149,7 @@ mysqli_close($conn);
 <body>
     <header>
         <nav>
-            <a href="menu.php">Home</a>
+            <a href="home.php">Home</a>
             <a href="find_books.php">尋找書本</a>
             <a href="bookseller.php" class="active">書本賣家</a>
         </nav>
