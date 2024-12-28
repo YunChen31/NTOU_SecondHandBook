@@ -13,7 +13,19 @@ include("connect.php");
 
 // 初始化變數
 $message = "";
+$seller_name="";
 $book = null;
+$seller_ID = $_SESSION['user_id'];
+
+    // 查詢賣家名稱
+    $seller_query = "SELECT name FROM user WHERE user_id = '$seller_ID'";
+    $seller_result = mysqli_query($conn, $seller_query);
+
+    if ($seller_result && mysqli_num_rows($seller_result) > 0) {
+        $row = mysqli_fetch_assoc($seller_result);
+        $seller_name = $row['name'];
+    } else {
+        $seller_name = "未找到賣家名稱";}
 
 // 檢查是否有 edit_id 傳入
 if (isset($_GET['edit_id'])) {
@@ -98,64 +110,117 @@ mysqli_close($conn);
     <title>修改書籍</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f2e9f2;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .container {
-            background-color: #fff;
-            padding: 20px 40px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 500px;
-        }
-        h1 {
-            font-size: 24px;
-            color: #333;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            font-size: 14px;
-            margin-bottom: 5px;
-        }
-        .form-group input, .form-group textarea {
-            width: 100%;
-            padding: 10px;
-            font-size: 14px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        .form-group textarea {
-            resize: none;
-        }
-        .btn {
-            width: 100%;
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #6c63ff;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        .btn:hover {
-            background-color: #5750d1;
-        }
-        .message {
-            text-align: center;
-            color: green;
-            margin-bottom: 10px;
-        }
+    font-family: Arial, sans-serif;
+    background-color: #f2e9f2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.container {
+    background-color: #fff;
+    padding: 20px 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px; /* 設定最大寬度 */
+    box-sizing: border-box; /* 包括 padding 和 border */
+}
+
+h1 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.form-group input, .form-group textarea {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.form-group textarea {
+    resize: none;
+}
+
+.btn {
+    width: 100%;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #6c63ff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.btn:hover {
+    background-color: #5750d1;
+}
+
+.message {
+    text-align: center;
+    color: green;
+    margin-bottom: 10px;
+}
+
+/* 響應式設計：當螢幕寬度小於768px時調整樣式 */
+@media (max-width: 768px) {
+    .container {
+        padding: 20px;
+        width: 90%; /* 調整為 90% 寬度以適應小螢幕 */
+    }
+
+    h1 {
+        font-size: 20px; /* 調整標題字型大小 */
+    }
+
+    .form-group input, .form-group textarea {
+        font-size: 12px; /* 輸入框的字型大小 */
+    }
+
+    .btn {
+        font-size: 14px; /* 按鈕字型大小 */
+        padding: 8px 16px; /* 按鈕大小調整 */
+    }
+}
+
+/* 響應式設計：當螢幕寬度小於480px時調整樣式 */
+@media (max-width: 480px) {
+    .container {
+        width: 100%; /* 更小螢幕時使用100%寬度 */
+    }
+
+    h1 {
+        font-size: 18px; /* 更小螢幕時標題字型大小調整 */
+    }
+
+    .form-group input, .form-group textarea {
+        font-size: 10px; /* 更小螢幕時輸入框字型大小調整 */
+    }
+
+    .btn {
+        font-size: 12px; /* 按鈕字型大小調整 */
+        padding: 6px 12px; /* 按鈕大小調整 */
+    }
+}
+
     </style>
 </head>
 <body>
@@ -168,6 +233,11 @@ mysqli_close($conn);
         <?php if ($book): ?>
             <form action="edit_book.php" method="POST">
                 <input type="hidden" name="book_ID" value="<?php echo $book['book_ID']; ?>">
+                
+                <div class="form-group">
+                <label for="seller_name">賣家:</label>
+                <div id="seller_name"><?php echo htmlspecialchars($seller_name); ?></div>
+                </div>
                 <div class="form-group">
                     <label for="book_title">書名</label>
                     <input type="text" id="book_title" name="book_title" value="<?php echo $book['book_title']; ?>" required>
