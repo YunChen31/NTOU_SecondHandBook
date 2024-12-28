@@ -219,6 +219,44 @@ $conn->close();
         }
 
         @media screen and (max-width: 768px) {
+            .container {
+                flex-direction: column; /* 改為垂直排列 */
+                padding: 20px;
+            }
+
+            .text-intro {
+                padding: 10px;
+                gap: 10px;
+            }
+
+            .text-intro h1, .text-intro h2 {
+                font-size: 2rem; /* 調整字體大小 */
+                margin-bottom: 10px;
+            }
+
+            .carousel {
+                width: 100%;
+                height: 100%; /* 限制高度 */
+                flex:100%;
+            }
+
+            .carousel-images {
+                object-fit: cover;
+            }
+
+            .carousel-images img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover
+            }
+
+            header nav a {
+                margin: 0 5px; /* 增加按鈕間距 */
+            }
+
+            .text-intro p {
+                font-size: 1rem; /* 減小字體 */
+            }
             .faq-container {
                 flex-direction: column;
                 align-items: center;
@@ -271,7 +309,6 @@ $conn->close();
             <div class="indicators">
                 <div class="active" data-index="0"></div>
                 <div data-index="1"></div>
-                <div data-index="2"></div>
             </div>
         </div>
     </div>
