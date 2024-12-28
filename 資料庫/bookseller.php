@@ -20,27 +20,36 @@ $delete_message = "";
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_id'])) {
     $delete_id = intval($_POST['delete_id']);
 
-    // 刪除 `transaction` 中的資料
-    $delete_transaction_query = "DELETE FROM transaction WHERE book_ID = '$delete_id'";
-    $delete_book_query = "DELETE FROM book WHERE book_ID = '$delete_id'";
+    // 刪除 `transaction` 和 `book` 中的資料
+    $delete_transaction_query = "DELETE FROM transaction WHERE book_ID = ?";
+    $delete_book_query = "DELETE FROM book WHERE book_ID = ?";
 
-    // 執行刪除操作
+    // 使用 MySQL 交易保證操作一致性
     mysqli_begin_transaction($conn);
     try {
-        if (!mysqli_query($conn, $delete_transaction_query)) {
-            throw new Exception("刪除交易資料失敗: " . mysqli_error($conn));
-        }
-        if (!mysqli_query($conn, $delete_book_query)) {
-            throw new Exception("刪除書籍資料失敗: " . mysqli_error($conn));
+        // 刪除 `transaction` 資料
+        $stmt = $conn->prepare($delete_transaction_query);
+        $stmt->bind_param("i", $delete_id);
+        if (!$stmt->execute()) {
+            throw new Exception("刪除交易資料失敗: " . $stmt->error);
         }
 
-        // 提交刪除
+        // 刪除 `book` 資料
+        $stmt = $conn->prepare($delete_book_query);
+        $stmt->bind_param("i", $delete_id);
+        if (!$stmt->execute()) {
+            throw new Exception("刪除書籍資料失敗: " . $stmt->error);
+        }
+
+        // 提交刪除操作
         mysqli_commit($conn);
         $delete_message = "資料已成功刪除！";
     } catch (Exception $e) {
         // 回滾刪除操作
         mysqli_rollback($conn);
         $delete_message = $e->getMessage();
+    } finally {
+        $stmt->close();
     }
 }
 
@@ -61,22 +70,26 @@ $query = "
         t.contact_information
     FROM book b
     JOIN transaction t ON b.book_ID = t.book_ID
-    WHERE b.seller_ID = '$user_id'";
+    WHERE b.seller_ID = ?";
 
-$result = mysqli_query($conn, $query);
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
 
 // 如果查詢失敗，顯示錯誤訊息
 if (!$result) {
-    die("資料庫查詢失敗：" . mysqli_error($conn));
+    die("資料庫查詢失敗：" . $stmt->error);
 }
 
 // 將查詢結果存儲到陣列
 $books = [];
-while ($row = mysqli_fetch_assoc($result)) {
+while ($row = $result->fetch_assoc()) {
     $books[] = $row;
 }
 
 // 關閉資料庫連線
+$stmt->close();
 mysqli_close($conn);
 ?>
 
@@ -87,7 +100,7 @@ mysqli_close($conn);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>書本賣家</title>
     <style>
-        body {
+         body {
             font-family: Arial, sans-serif;
             background-color: #f2e9f2;
             margin: 0;
@@ -183,7 +196,7 @@ mysqli_close($conn);
     <div class="container">
         <h1>書本賣家</h1>
         <?php if ($delete_message): ?>
-            <div class="message"><?php echo $delete_message; ?></div>
+            <div class="message"><?php echo htmlspecialchars($delete_message, ENT_QUOTES, 'UTF-8'); ?></div>
         <?php endif; ?>
         <div>
             <button class="btn" onclick="window.location.href='add_book.php'">新增</button>
@@ -208,21 +221,21 @@ mysqli_close($conn);
                     <?php foreach ($books as $index => $book) { ?>
                         <tr>
                             <td><?php echo $index + 1; ?></td>
-                            <td><?php echo $book['book_title']; ?></td>
-                            <td><?php echo $book['dept_name']; ?></td>
-                            <td><?php echo $book['subject']; ?></td>
-                            <td>$<?php echo $book['price']; ?></td>
-                            <td><?php echo $book['description']; ?></td>
-                            <td><?php echo $book['meeting_point']; ?></td>
-                            <td><?php echo $book['available_time']; ?></td>
-                            <td><?php echo $book['contact_information']; ?></td>
+                            <td><?php echo htmlspecialchars($book['book_title'], ENT_QUOTES, 'UTF-8'); ?></td>
+                            <td><?php echo htmlspecialchars($book['dept_name'], ENT_QUOTES, 'UTF-8'); ?></td>
+                            <td><?php echo htmlspecialchars($book['subject'], ENT_QUOTES, 'UTF-8'); ?></td>
+                            <td>$<?php echo htmlspecialchars($book['price'], ENT_QUOTES, 'UTF-8'); ?></td>
+                            <td><?php echo htmlspecialchars($book['description'], ENT_QUOTES, 'UTF-8'); ?></td>
+                            <td><?php echo htmlspecialchars($book['meeting_point'], ENT_QUOTES, 'UTF-8'); ?></td>
+                            <td><?php echo htmlspecialchars($book['available_time'], ENT_QUOTES, 'UTF-8'); ?></td>
+                            <td><?php echo htmlspecialchars($book['contact_information'], ENT_QUOTES, 'UTF-8'); ?></td>
                             <td>
                                 <form action="bookseller.php" method="POST" style="display:inline;">
-                                    <input type="hidden" name="delete_id" value="<?php echo $book['book_ID']; ?>">
-                                    <button type="submit" class="btn">刪除</button>
+                                    <input type="hidden" name="delete_id" value="<?php echo htmlspecialchars($book['book_ID'], ENT_QUOTES, 'UTF-8'); ?>">
+                                    <button type="submit" class="btn delete-btn">刪除</button>
                                 </form>
                                 <form action="edit_book.php" method="GET" style="display:inline;">
-                                    <input type="hidden" name="edit_id" value="<?php echo $book['book_ID']; ?>">
+                                    <input type="hidden" name="edit_id" value="<?php echo htmlspecialchars($book['book_ID'], ENT_QUOTES, 'UTF-8'); ?>">
                                     <button type="submit" class="btn">修改</button>
                                 </form>
                             </td>

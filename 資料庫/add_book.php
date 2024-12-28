@@ -11,67 +11,73 @@ if (!isset($_SESSION['user_id'])) {
 include("connect.php");
 
 // 初始化賣家名稱變數
-$seller_name = ""; // 預設為未找到賣家名稱
+$seller_name = "未找到賣家名稱"; // 預設為未找到賣家名稱
 // 初始化訊息
 $message = "";
-    $seller_ID = $_SESSION['user_id'];
+$seller_ID = $_SESSION['user_id'];
 
-    // 查詢賣家名稱
-    $seller_query = "SELECT name FROM user WHERE user_id = '$seller_ID'";
-    $seller_result = mysqli_query($conn, $seller_query);
-
-    if ($seller_result && mysqli_num_rows($seller_result) > 0) {
-        $row = mysqli_fetch_assoc($seller_result);
+// 查詢賣家名稱
+$seller_query = "SELECT name FROM user WHERE user_id = ?";
+if ($stmt = $conn->prepare($seller_query)) {
+    $stmt->bind_param("s", $seller_ID);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
         $seller_name = $row['name'];
-    } else {
-        $seller_name = "未找到賣家名稱";
     }
+    $stmt->close();
+}
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // 從表單接收資料
-    $book_title = mysqli_real_escape_string($conn, $_POST['book_title']);
-    $dept_name = mysqli_real_escape_string($conn, $_POST['dept_name']);
-    $subject = mysqli_real_escape_string($conn, $_POST['subject']);
-    $price = mysqli_real_escape_string($conn, $_POST['price']);
-    $description = mysqli_real_escape_string($conn, $_POST['description']);
-    $meeting_point = mysqli_real_escape_string($conn, $_POST['meeting_point']);
-    $available_time = mysqli_real_escape_string($conn, $_POST['available_time']);
-    $contact_information = mysqli_real_escape_string($conn, $_POST['contact_information']);
-    $seller_ID = $_SESSION['user_id'];
+    $book_title = $_POST['book_title'];
+    $dept_name = $_POST['dept_name'];
+    $subject = $_POST['subject'];
+    $price = $_POST['price'];
+    $description = $_POST['description'];
+    $meeting_point = $_POST['meeting_point'];
+    $available_time = $_POST['available_time'];
+    $contact_information = $_POST['contact_information'];
 
     // 開始資料庫事務
-    mysqli_begin_transaction($conn);
+    $conn->begin_transaction();
 
     try {
         // 插入資料到 book 表格
-        $book_query = "INSERT INTO book (book_title, seller_ID, dept_name, subject, price, description)
-                       VALUES ('$book_title', '$seller_ID', '$dept_name', '$subject', '$price', '$description')";
-        if (!mysqli_query($conn, $book_query)) {
-            throw new Exception("新增書籍失敗：" . mysqli_error($conn));
+        $book_query = "INSERT INTO book (book_title, seller_ID, dept_name, subject, price, description) VALUES (?, ?, ?, ?, ?, ?)";
+        $stmt = $conn->prepare($book_query);
+        $stmt->bind_param("ssssds", $book_title, $seller_ID, $dept_name, $subject, $price, $description);
+        if (!$stmt->execute()) {
+            throw new Exception("新增書籍失敗：" . $stmt->error);
         }
 
         // 獲取插入的 book_ID
-        $book_ID = mysqli_insert_id($conn);
+        $book_ID = $conn->insert_id;
+        $stmt->close();
 
         // 插入資料到 transaction 表格
-        $transaction_query = "INSERT INTO transaction (book_ID, seller_ID, meeting_point, available_time, contact_information)
-                              VALUES ('$book_ID', '$seller_ID', '$meeting_point', '$available_time', '$contact_information')";
-        if (!mysqli_query($conn, $transaction_query)) {
-            throw new Exception("新增交易資訊失敗：" . mysqli_error($conn));
+        $transaction_query = "INSERT INTO transaction (book_ID, seller_ID, meeting_point, available_time, contact_information) VALUES (?, ?, ?, ?, ?)";
+        $stmt = $conn->prepare($transaction_query);
+        $stmt->bind_param("issss", $book_ID, $seller_ID, $meeting_point, $available_time, $contact_information);
+        if (!$stmt->execute()) {
+            throw new Exception("新增交易資訊失敗：" . $stmt->error);
         }
 
         // 提交交易
-        mysqli_commit($conn);
+        $conn->commit();
         $message = "書籍與交易資訊新增成功！";
+        $stmt->close();
 
     } catch (Exception $e) {
         // 若有錯誤，回滾交易
-        mysqli_rollback($conn);
+        $conn->rollback();
         $message = $e->getMessage();
     }
 }
 
 // 關閉資料庫連線
-mysqli_close($conn);
+$conn->close();
 ?>
 
 <!DOCTYPE html>
