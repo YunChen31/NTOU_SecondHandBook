@@ -144,6 +144,31 @@ mysqli_close($conn);
             font-size: 14px;
             margin-bottom: 10px;
         }
+
+        /* RWD 支援 */
+        @media (max-width: 768px) {
+            table {
+                font-size: 12px;
+            }
+            th, td {
+                padding: 5px;
+            }
+            .btn {
+                font-size: 12px;
+                padding: 5px 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            header nav {
+                font-size: 14px;
+            }
+        }
     </style>
 </head>
 <body>
