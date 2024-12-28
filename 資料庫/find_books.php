@@ -86,6 +86,17 @@ while ($row = mysqli_fetch_assoc($result)) {
     $books[] = $row;
 }
 
+$count_query = "SELECT COUNT(*) AS total_count FROM book b JOIN transaction t ON b.book_ID = t.book_ID";
+if (count($conditions) > 0) {
+    $count_query .= " WHERE " . implode(' AND ', $conditions);
+}
+$count_result = mysqli_query($conn, $count_query);
+$total_count = 0;
+if ($count_result) {
+    $count_row = mysqli_fetch_assoc($count_result);
+    $total_count = $count_row['total_count'];
+}
+
 // 抓取所有科系選項
 $dept_query = "SELECT DISTINCT dept_name FROM book";
 $dept_result = mysqli_query($conn, $dept_query);
@@ -250,6 +261,8 @@ mysqli_close($conn);
             </select>
             <button type="submit" class="btn">篩選</button>
         </form>
+
+        <p>共找到 <?php echo $total_count; ?> 筆資料</p>
         <table>
             <thead>
                 <tr>
