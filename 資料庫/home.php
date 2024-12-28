@@ -21,7 +21,6 @@ $stmt->fetch();
 // 關閉連接
 $stmt->close();
 $conn->close();
-
 ?>
 
 <!DOCTYPE html>
@@ -57,7 +56,7 @@ $conn->close();
         }
 
         header nav a.logout-btn {
-            margin-left: auto; /* 使登出按鈕推到最右邊 */
+            margin-left: auto;
             padding: 8px 10px;
             background-color: rgb(168, 164, 239);
             color: rgb(22, 17, 117);
@@ -67,7 +66,7 @@ $conn->close();
         }
 
         header nav a.logout-btn:hover {
-            background-color:rgb(129, 123, 237);
+            background-color: rgb(129, 123, 237);
         }
 
         .container {
@@ -83,9 +82,9 @@ $conn->close();
         .text-intro {
             flex: 1;
             padding: 15px;
-            display: flex;           /* 使用 flex 來排版 */
-            flex-direction: column;  /* 垂直排列 */
-            justify-content: flex-start; /* 將內容對齊至容器的上方 */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
             gap: 0px;
         }
         .text-intro h1 {
@@ -104,8 +103,8 @@ $conn->close();
             flex: 1;
             position: relative;
             overflow: hidden;
-            width: 100%;  /* 讓carousel的寬度填滿父容器 */
-            height: 100%;; /* 限制高度在視口內 */
+            width: 100%;
+            height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -113,15 +112,15 @@ $conn->close();
         .carousel-images {
             display: flex;
             transition: transform 0.5s ease-in-out;
-            width: 100%; /* 設為 100% 以顯示單一圖片 */
+            width: 100%;
             height: 100%;
             object-fit: cover;
         }
 
         .carousel-images img {
-            width: 100%; /* 每張圖片的寬度等於容器寬度 */
-            height: 100%; /* 圖片高度填滿區域 */
-            object-fit: cover; /* 保持比例且填充 */
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .carousel-buttons {
@@ -162,47 +161,91 @@ $conn->close();
             background-color: black;
         }
 
-        @media screen and (max-width: 768px) {
-        .container {
-            flex-direction: column; /* 改為垂直排列 */
+        .faq {
             padding: 20px;
+            margin-top: 0;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
         }
 
-        .text-intro {
-            padding: 10px;
-            gap: 10px;
+        .faq h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            text-align: center;
         }
 
-        .text-intro h1, .text-intro h2 {
-            font-size: 2rem; /* 調整字體大小 */
-            margin-bottom: 10px;
+        .faq-container {
+            display: flex;
+            justify-content: flex-start;
+            gap: 20px;
+            flex-wrap: wrap;
         }
 
-        .carousel {
+        .faq-item {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            width: 30%;
+            margin-bottom: 20px;
+        }
+
+        .faq-item img {
             width: 100%;
-            height: 300px; /* 限制高度 */
-            flex: 1.2;
+            height: 100%;
+            object-fit: cover;  /* 確保圖片填滿框架 */
+            aspect-ratio: 16/9;  /* 保持圖片比例為16:9 */
+            margin-bottom: 15px;
         }
 
-        .carousel-images img {
-            object-fit: cover; /* 確保圖片以適當比例顯示 */
+        .faq-text {
+            flex: 1;
+            text-align: center;
         }
 
-        header nav a {
-            margin: 0 5px; /* 增加按鈕間距 */
+        .faq-item h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #333;
         }
 
-        .text-intro p {
-            font-size: 1rem; /* 減小字體 */
+        .faq-item p {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: #555;
         }
-}
+
+        @media screen and (max-width: 768px) {
+            .faq-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .faq-item {
+                width: 80%;
+            }
+
+            .faq-item img {
+                width: 300px;  /* 增大圖片的寬度 */
+                height: auto;  /* 保持圖片比例 */
+                object-fit: cover;  /* 確保圖片填滿框架 */
+                aspect-ratio: 16/9;  /* 保持圖片比例 */
+            }
+
+            .faq-text {
+                text-align: center;
+            }
+        }
     </style>
 </head>
 <body>
     <header>
         <nav>
             <a href="home.php" class="active">Home</a>
-            <a href="find_books.php" >尋找書本</a>
+            <a href="find_books.php">尋找書本</a>
             <a href="bookseller.php">書本賣家</a>
             <a href="logout.php" class="logout-btn">登出</a>
         </nav>
@@ -232,37 +275,54 @@ $conn->close();
             </div>
         </div>
     </div>
+    <div class="faq">
+        <h2>常見問題</h2>
+        <div class="faq-container">
+            <div class="faq-item">
+                <div class="faq-text">
+                    <h3>如何查詢書籍？</h3>
+                    <p>您可以透過我們的搜尋功能，篩選科系或科目來查詢書籍。</p>
+                </div>
+                <img src="尋找書本.png" alt="圖片1">
+            </div>
+            <div class="faq-item">
+                <div class="faq-text">
+                    <h3>如何出售我的書籍？</h3>
+                    <p>您可以在「書本賣家」頁面上傳您的書籍資訊，讓其他用戶看到並聯繫您。要是成功售出，可以刪除書本。</p>
+                </div>
+                <img src="書本賣家.png" alt="圖片2">
+            </div>
+            <div class="faq-item">
+                <div class="faq-text">
+                    <h3>如何聯繫賣家？</h3>
+                    <p>您可以在「尋找書本」頁面上，找到賣家聯絡資訊，並連絡賣家。</p>
+                </div>
+                <img src="聯絡.png" alt="圖片3">
+            </div>
+        </div>
+    </div>
 
     <script>
         const images = document.querySelector(".carousel-images");
         const indicators = document.querySelectorAll(".indicators div");
-        const prevBtn = document.getElementById("prev");
-        const nextBtn = document.getElementById("next");
-
         let currentIndex = 0;
 
-        function updateCarousel(index) {
-            images.style.transform = `translateX(-${index * 100}%)`;
+        document.getElementById("next").addEventListener("click", function() {
+            currentIndex = (currentIndex + 1) % images.children.length;
+            updateCarousel();
+        });
+
+        document.getElementById("prev").addEventListener("click", function() {
+            currentIndex = (currentIndex - 1 + images.children.length) % images.children.length;
+            updateCarousel();
+        });
+
+        function updateCarousel() {
+            const offset = -currentIndex * 100;
+            images.style.transform = `translateX(${offset}%)`;
             indicators.forEach(indicator => indicator.classList.remove("active"));
-            indicators[index].classList.add("active");
+            indicators[currentIndex].classList.add("active");
         }
-
-        prevBtn.addEventListener("click", () => {
-            currentIndex = (currentIndex > 0) ? currentIndex - 1 : indicators.length - 1;
-            updateCarousel(currentIndex);
-        });
-
-        nextBtn.addEventListener("click", () => {
-            currentIndex = (currentIndex < indicators.length - 1) ? currentIndex + 1 : 0;
-            updateCarousel(currentIndex);
-        });
-
-        indicators.forEach(indicator => {
-            indicator.addEventListener("click", () => {
-                currentIndex = parseInt(indicator.getAttribute("data-index"));
-                updateCarousel(currentIndex);
-            });
-        });
     </script>
 </body>
 </html>
