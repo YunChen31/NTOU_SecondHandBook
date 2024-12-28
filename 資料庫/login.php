@@ -11,8 +11,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = mysqli_real_escape_string($conn, $_POST['password']);
 
     // 從資料庫中檢查帳號和密碼是否匹配
-    $query = "SELECT * FROM user WHERE account_number = '$account' AND password = '$password'";
-    $result = mysqli_query($conn, $query);
+    $query = "SELECT * FROM user WHERE account_number = ? AND password = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("ss", $account, $password);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
     if (mysqli_num_rows($result) == 1) {
         // 帳號和密碼匹配，取得使用者資料
@@ -27,12 +30,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         header("Location: home.php");
         exit();
     } else {
-        // 帳號或密碼錯誤
-        echo"帳號或密碼錯誤，請重新輸入。";
-        //header("Location: menu.php");
+        // 帳號或密碼錯誤，顯示錯誤訊息並彈出視窗提示
+        echo "<script>alert('帳號或密碼錯誤，請重新輸入。'); window.location.href='menu.php';</script>";
     }
+    mysqli_stmt_close($stmt);
 }
-
 // 關閉資料庫連線
 mysqli_close($conn);
 ?>

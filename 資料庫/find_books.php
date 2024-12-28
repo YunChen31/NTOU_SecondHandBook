@@ -12,21 +12,25 @@ if (!isset($_SESSION['user_id'])) {
 include("connect.php");
 
 if (isset($_GET['dept_name']) && isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
-    $dept_name = mysqli_real_escape_string($conn, $_GET['dept_name']);
-    $subject_query = "SELECT DISTINCT subject FROM book WHERE dept_name = '$dept_name'";
-    $subject_result = mysqli_query($conn, $subject_query);
-    
+    $dept_name = $_GET['dept_name'];
+
+    $subject_query = "SELECT DISTINCT subject FROM book WHERE dept_name = ?";
+    $stmt = $conn->prepare($subject_query);
+    $stmt->bind_param("s", $dept_name);
+    $stmt->execute();
+    $subject_result = $stmt->get_result();
+
     $subjects = [];
-    while ($subject = mysqli_fetch_assoc($subject_result)) {
+    while ($subject = $subject_result->fetch_assoc()) {
         $subjects[] = $subject['subject'];
     }
-    
+
+    $stmt->close();
+
     // 回傳 JSON 格式的科目資料
     echo json_encode($subjects);
     exit;
 }
-
-
 
 // 初始化變數
 $message = "";
@@ -60,67 +64,100 @@ $query = "
 ";
 
 $conditions = [];
+$params = [];
+$types = "";
+
 if (!empty($selected_dept)) {
-    $conditions[] = "b.dept_name = '$selected_dept'";
+    $conditions[] = "b.dept_name = ?";
+    $params[] = $selected_dept;
+    $types .= "s";
 }
 
-// 如果選擇了科目，則加入條件
 if (!empty($selected_subject)) {
-    $conditions[] = "b.subject = '$selected_subject'";
+    $conditions[] = "b.subject = ?";
+    $params[] = $selected_subject;
+    $types .= "s";
 }
 
-// 如果有篩選條件，則在查詢中加上 WHERE 子句
 if (count($conditions) > 0) {
     $query .= " WHERE " . implode(' AND ', $conditions);
 }
-$result = mysqli_query($conn, $query);
+
+$stmt = $conn->prepare($query);
+if (!empty($params)) {
+    $stmt->bind_param($types, ...$params);
+}
+$stmt->execute();
+$result = $stmt->get_result();
 
 // 如果查詢失敗，顯示錯誤訊息
 if (!$result) {
-    die("資料庫查詢失敗：" . mysqli_error($conn));
+    die("資料庫查詢失敗：" . $conn->error);
 }
 
 // 將查詢結果存儲到陣列
 $books = [];
-while ($row = mysqli_fetch_assoc($result)) {
+while ($row = $result->fetch_assoc()) {
     $books[] = $row;
 }
+$stmt->close();
 
 $count_query = "SELECT COUNT(*) AS total_count FROM book b JOIN transaction t ON b.book_ID = t.book_ID";
 if (count($conditions) > 0) {
     $count_query .= " WHERE " . implode(' AND ', $conditions);
 }
-$count_result = mysqli_query($conn, $count_query);
+
+$stmt = $conn->prepare($count_query);
+if (!empty($params)) {
+    $stmt->bind_param($types, ...$params);
+}
+$stmt->execute();
+$count_result = $stmt->get_result();
+
 $total_count = 0;
 if ($count_result) {
-    $count_row = mysqli_fetch_assoc($count_result);
+    $count_row = $count_result->fetch_assoc();
     $total_count = $count_row['total_count'];
 }
+$stmt->close();
 
 // 抓取所有科系選項
 $dept_query = "SELECT DISTINCT dept_name FROM book";
-$dept_result = mysqli_query($conn, $dept_query);
+$stmt = $conn->prepare($dept_query);
+$stmt->execute();
+$dept_result = $stmt->get_result();
+
 $departments = [];
-while ($row = mysqli_fetch_assoc($dept_result)) {
+while ($row = $dept_result->fetch_assoc()) {
     $departments[] = $row['dept_name'];
 }
+$stmt->close();
 
 
 // 抓取所有科目選項
 $subject_query = "SELECT DISTINCT subject FROM book";
-$subject_result = mysqli_query($conn, $subject_query);
+$stmt = $conn->prepare($subject_query);
+$stmt->execute();
+$subject_result = $stmt->get_result();
+
 $all_subjects = [];
-while ($row = mysqli_fetch_assoc($subject_result)) {
+while ($row = $subject_result->fetch_assoc()) {
     $all_subjects[] = $row['subject'];
 }
+$stmt->close();
 
 $subjects = [];
 if (!empty($selected_dept)) {
-    $subject_query = "SELECT DISTINCT subject FROM book WHERE dept_name = '$selected_dept'";
-    $subject_result = mysqli_query($conn, $subject_query);
-    while ($subject = mysqli_fetch_assoc($subject_result)) {
+    $subject_query = "SELECT DISTINCT subject FROM book WHERE dept_name = ?";
+    $stmt = $conn->prepare($subject_query);
+    $stmt->bind_param("s", $selected_dept);
+    $stmt->execute();
+    $subject_result = $stmt->get_result();
+
+    while ($subject = $subject_result->fetch_assoc()) {
         $subjects[] = $subject['subject'];
     }
+    $stmt->close();
 }
 
 // 關閉資料庫連線

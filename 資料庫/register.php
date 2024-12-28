@@ -42,7 +42,13 @@
             border-radius: 5px;
             font-size: 14px;
         }
-        .btn-submit {
+
+        .btn-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .btn-submit, .btn-back {
             padding: 10px 20px;
             font-size: 14px;
             color: #fff;
@@ -53,7 +59,16 @@
             text-align: center;
             display: inline-block;
         }
+        .btn-submit {
+            background-color: #6c63ff;
+        }
         .btn-submit:hover {
+            background-color: #5750d1;
+        }
+        .btn-back {
+            background-color: #6c63ff;
+        }
+        .btn-back:hover {
             background-color: #5750d1;
         }
     </style>
@@ -78,8 +93,9 @@
                 <label for="name">名字</label>
                 <input type="text" id="name" name="name" required>
             </div>
-            <div>
-                <button type="submit" class="btn-submit">確定</button>
+            <div class="btn-group">
+                <button type="submit" class="btn-submit">註冊</button>
+                <button type="button" class="btn-back" onclick="window.location.href='menu.php'">返回登入頁面</button>
             </div>
         </form>
     </div>
