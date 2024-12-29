@@ -87,13 +87,13 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>新增書籍</title>
     <style>
-       body {
+    body {
     font-family: Arial, sans-serif;
     background-color: #f2e9f2;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
     margin: 0;
 }
 
@@ -105,6 +105,8 @@ $conn->close();
     width: 100%;
     max-width: 600px; /* 設定最大寬度 */
     box-sizing: border-box; /* 包括 padding 和 border */
+    margin: 20px 0; /* 增加垂直邊距，避免頂部被擋住 */
+    overflow: auto; /* 確保內容可捲動 */
 }
 
 h1 {

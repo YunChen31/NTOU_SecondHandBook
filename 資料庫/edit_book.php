@@ -132,7 +132,7 @@ mysqli_close($conn);
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
     margin: 0;
 }
 
@@ -144,6 +144,8 @@ mysqli_close($conn);
     width: 100%;
     max-width: 600px; /* 設定最大寬度 */
     box-sizing: border-box; /* 包括 padding 和 border */
+    margin: 20px 0; /* 增加垂直邊距，避免頂部被擋住 */
+    overflow: auto; /* 確保內容可捲動 */
 }
 
 h1 {
