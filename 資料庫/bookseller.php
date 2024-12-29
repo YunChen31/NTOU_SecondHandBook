@@ -133,6 +133,7 @@ mysqli_close($conn);
             border-radius: 5px;
             cursor: pointer;
             margin-right: 10px;
+            margin-bottom: 5px;
         }
         .btn:hover {
             background-color: #5750d1;
@@ -230,7 +231,7 @@ mysqli_close($conn);
                             <td><?php echo htmlspecialchars($book['available_time'], ENT_QUOTES, 'UTF-8'); ?></td>
                             <td><?php echo htmlspecialchars($book['contact_information'], ENT_QUOTES, 'UTF-8'); ?></td>
                             <td>
-                                <form action="bookseller.php" method="POST" style="display:inline;">
+                                <form action="bookseller.php" method="POST" style="display:inline;" onsubmit="return confirmDelete();">
                                     <input type="hidden" name="delete_id" value="<?php echo htmlspecialchars($book['book_ID'], ENT_QUOTES, 'UTF-8'); ?>">
                                     <button type="submit" class="btn delete-btn">刪除</button>
                                 </form>
@@ -250,4 +251,9 @@ mysqli_close($conn);
         </table>
     </div>
 </body>
+<script>
+    function confirmDelete() {
+        return confirm("您確定要刪除此項資料嗎？");
+    }
+</script>
 </html>
